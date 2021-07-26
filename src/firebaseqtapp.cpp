@@ -2,8 +2,12 @@
 #include "firebaseqtapp_p.h"
 
 #ifdef Q_OS_ANDROID
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
 #include <QtAndroid>
 #include <QAndroidJniEnvironment>
+#else
+#include <QJniEnvironment>
+#endif
 #endif
 
 #include "firebase/messaging.h"
@@ -86,10 +90,15 @@ void FirebaseQtApp::initialize()
     }
 
 #ifdef Q_OS_ANDROID
+
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
     QAndroidJniEnvironment env;
+#else
+    QJniEnvironment env;
+#endif
+
     d->app = ::firebase::App::Create(options, &*env, QtAndroid::androidActivity().object());
 #else
-//    d->app = ::firebase::App::Create(options);
     d->app = ::firebase::App::Create();
 #endif
     Q_ASSERT_X(d->app, "FirebaseQtApp", "App::Create");

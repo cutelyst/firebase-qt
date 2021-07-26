@@ -4,7 +4,7 @@
 #include <QString>
 #include <vector>
 
-#include "firebase/app.h"
+#include <firebase/app.h>
 #include "firebaseqtabstractmodule.h"
 
 class FirebaseQtAppPrivate {
