@@ -7,10 +7,6 @@
 #include "firebaseqtauthcredential.h"
 #include "firebaseqtauthcredential_p.h"
 
-#ifdef Q_OS_ANDROID
-#include <QtAndroid>
-#endif
-
 #include <QThread>
 #include <QLoggingCategory>
 

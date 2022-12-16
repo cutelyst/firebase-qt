@@ -1,13 +1,12 @@
 #include "firebaseqtapp.h"
 #include "firebaseqtapp_p.h"
 
-#ifdef Q_OS_ANDROID
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
+#if defined(Q_OS_ANDROID) && QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 #include <QtAndroid>
 #include <QAndroidJniEnvironment>
-#else
+#elif defined(Q_OS_ANDROID)
+#include <QtCore/private/qandroidextras_p.h>
 #include <QJniEnvironment>
-#endif
 #endif
 
 #include "firebase/messaging.h"
@@ -89,18 +88,16 @@ void FirebaseQtApp::initialize()
         options.set_project_id(d->projectId.toLatin1().constData());
     }
 
-#ifdef Q_OS_ANDROID
-
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
+#if defined(Q_OS_ANDROID) && QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QAndroidJniEnvironment env;
-#else
-    QJniEnvironment env;
-#endif
-
     d->app = ::firebase::App::Create(options, &*env, QtAndroid::androidActivity().object());
+#elif defined(Q_OS_ANDROID)
+    QJniEnvironment env;
+    d->app = ::firebase::App::Create(options, &*env, QNativeInterface::QAndroidApplication::context());
 #else
     d->app = ::firebase::App::Create();
 #endif
+
     Q_ASSERT_X(d->app, "FirebaseQtApp", "App::Create");
 
     QTimer::singleShot(0, this, [=] {
