@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: (C) 2021 Daniel Nicoletti <dantti12@gmail.com>
+# SPDX-License-Identifier: MIT
+
+# - Config information for FirebaseQt
+# This file defines:
+#
+#  FirebaseQt_INCLUDE_DIR - the FirebaseQt include directory
+#  FirebaseQt_LIBRARY - Link these to use FirebaseQt
+
+SET(prefix "@CMAKE_INSTALL_PREFIX@")
+SET(exec_prefix "@CMAKE_INSTALL_PREFIX@")
+SET(FirebaseQt_FOUND "TRUE")
+    
+include("${CMAKE_CURRENT_LIST_DIR}/Firebase@PROJECT_VERSION_MAJOR@Qt@QT_VERSION_MAJOR@Targets.cmake")
