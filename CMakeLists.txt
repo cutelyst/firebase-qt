@@ -26,7 +26,7 @@ find_package(Qt${QT_VERSION_MAJOR} 6.4 COMPONENTS Core Network REQUIRED)
 include(FetchContent)
 FetchContent_Declare(
     firebase_cpp_sdk
-    URL https://dl.google.com/firebase/sdk/cpp/firebase_cpp_sdk_12.3.0.zip
+    URL https://dl.google.com/firebase/sdk/cpp/firebase_cpp_sdk_11.10.0.zip
 )
 
 # MakeAvailable will run the CMakeList.txt script that was downloaded
@@ -34,7 +34,7 @@ FetchContent_Declare(
 # before running that script is only defined after MakeAvailable
 # so we set it here, in the hope FETCHCONTENT_BASE_DIR is not changed.
 set(FIREBASE_CPP_SDK_DIR "${CMAKE_BINARY_DIR}/_deps/firebase_cpp_sdk-src")
-message("FIREBASE_CPP_SDK_DIR=${FIREBASE_CPP_SDK_DIR}")
+message(STATUS "FIREBASE_CPP_SDK_DIR=${FIREBASE_CPP_SDK_DIR}")
 
 FetchContent_MakeAvailable(firebase_cpp_sdk)
 
