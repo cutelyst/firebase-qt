@@ -93,7 +93,7 @@ void FirebaseQtApp::initialize()
     d->app = ::firebase::App::Create(options, &*env, QtAndroid::androidActivity().object());
 #elif defined(Q_OS_ANDROID)
     QJniEnvironment env;
-    d->app = ::firebase::App::Create(options, &*env, QNativeInterface::QAndroidApplication::context());
+    d->app = ::firebase::App::Create(options, &*env, QNativeInterface::QAndroidApplication::context().object());
 #else
     d->app = ::firebase::App::Create();
 #endif
