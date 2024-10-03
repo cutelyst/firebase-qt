@@ -12,17 +12,19 @@
 
 Q_LOGGING_CATEGORY(FIREBASE_AUTHPHONE, "firebase.authphone")
 
-class FirebaseQtAuthPhoneListener : public ::firebase::auth::PhoneAuthProvider::Listener {
+using namespace firebase;
+
+class FirebaseQtAuthPhoneListener : public auth::PhoneAuthProvider::Listener {
 public:
     FirebaseQtAuthPhoneListener(FirebaseQtAuthPhone *q) : q_ptr(q) {}
     ~FirebaseQtAuthPhoneListener() override {}
 
-    void OnVerificationCompleted(::firebase::auth::Credential credential) override;
+    void OnVerificationCompleted(auth::PhoneAuthCredential credential) override;
 
     void OnVerificationFailed(const std::string &error) override;
 
     void OnCodeSent(const std::string &verification_id,
-                    const ::firebase::auth::PhoneAuthProvider::ForceResendingToken &force_resending_token) override;
+                    const auth::PhoneAuthProvider::ForceResendingToken &force_resending_token) override;
 
     FirebaseQtAuthPhone *q_ptr;
 };
@@ -49,19 +51,22 @@ void FirebaseQtAuthPhone::verifyPhoneNumber(const QString &phoneNumber)
 {
     Q_D(FirebaseQtAuthPhone);
     auto listener = new FirebaseQtAuthPhoneListener(this);
-    ::firebase::auth::PhoneAuthProvider &phone_provider = ::firebase::auth::PhoneAuthProvider::GetInstance(d->auth->d_ptr->auth);
-    phone_provider.VerifyPhoneNumber(phoneNumber.toLatin1().constData(), 2000, nullptr, listener);
+    auth::PhoneAuthProvider &phone_provider = auth::PhoneAuthProvider::GetInstance(d->auth->d_ptr->auth);
+    auth::PhoneAuthOptions options;
+    options.phone_number = phoneNumber.toStdString();
+    options.timeout_milliseconds = 5000;
+    phone_provider.VerifyPhoneNumber(options, listener);
 }
 
 FirebaseQtAuthCredential FirebaseQtAuthPhone::getCredential(const QString &verificationId, const QString &code) const
 {
     Q_D(const FirebaseQtAuthPhone);
-    ::firebase::auth::PhoneAuthProvider &phone_provider = ::firebase::auth::PhoneAuthProvider::GetInstance(d->auth->d_ptr->auth);
-    ::firebase::auth::Credential cred = phone_provider.GetCredential(verificationId.toLatin1().constData(), code.toLatin1().constData());
+    auth::PhoneAuthProvider &phone_provider = auth::PhoneAuthProvider::GetInstance(d->auth->d_ptr->auth);
+    auth::Credential cred = phone_provider.GetCredential(verificationId.toLatin1().constData(), code.toLatin1().constData());
     return FirebaseQtAuthCredential(new FirebaseQtAuthCredentialPrivate(cred));
 }
 
-void FirebaseQtAuthPhoneListener::OnVerificationCompleted(firebase::auth::Credential credential) {
+void FirebaseQtAuthPhoneListener::OnVerificationCompleted(firebase::auth::PhoneAuthCredential credential) {
     // Auto-sms-retrieval or instant validation has succeeded (Android only).
     // No need for the user to input the verification code manually.
     // `credential` can be used instead of calling GetCredential().
