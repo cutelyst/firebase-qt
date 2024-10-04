@@ -4,12 +4,10 @@
 set(firebase_qt_SRC
     firebaseqtapp.cpp
     firebaseqtabstractmodule.cpp
-    firebaseqtmessaging.cpp
 )
 
 set(firebase_qt_HEADERS
     firebaseqtapp.h
-    firebaseqtmessaging.h
 )
 
 set(firebase_qt_HEADERS_PRIVATE

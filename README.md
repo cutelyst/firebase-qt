@@ -7,32 +7,93 @@ Supports:
 
 ## Example of usage
 
-Google Firebase SDK use futures that runs on different threads, so in order to avoid a crash due updating a Qt GUI from the wrong thread always use Qt:: QueuedConnection.
+Google Firebase SDK use futures that runs on different threads, so in order to avoid a crash due updating a Qt GUI from the wrong thread we internally use Qt:: QueuedConnection.
 
 Initialize:
 
     auto firebase = new FirebaseQtApp(this);
     auto messaging = new FirebaseQtMessaging(firebase);
-    connect(messaging, &FirebaseQtMessaging::tokenReceived, this, &Central::firebaseUpdateMessagingToken, Qt::QueuedConnection);
-    connect(messaging, &FirebaseQtMessaging::messageReceived, this, &Central::firebaseOnMessage, Qt::QueuedConnection);
+    connect(messaging, &FirebaseQtMessaging::tokenReceived, this, &Central::firebaseUpdateMessagingToken);
+    connect(messaging, &FirebaseQtMessaging::messageReceived, this, &Central::firebaseOnMessage);
 
     m_firebaseAuth = new FirebaseQtAuth(firebase);
-    connect(m_firebaseAuth, &FirebaseQtAuth::signInToken, this, &Central::firebaseUserToken, Qt::QueuedConnection);
-    connect(m_firebaseAuth, &FirebaseQtAuth::signInError, this, &Central::firebaseUserTokenError, Qt::QueuedConnection);
+    connect(m_firebaseAuth, &FirebaseQtAuth::signInToken, this, &Central::firebaseUserToken);
+    connect(m_firebaseAuth, &FirebaseQtAuth::signInError, this, &Central::firebaseUserTokenError);
 
     m_firebaseAuthPhone = new FirebaseQtAuthPhone(m_firebaseAuth);
-    connect(m_firebaseAuthPhone, &FirebaseQtAuthPhone::codeSent, this, &Central::firebaseAuthCodeSent, Qt::QueuedConnection);
-    connect(m_firebaseAuthPhone, &FirebaseQtAuthPhone::verificationFailed, this, &Central::firebaseAuthFailed, Qt::QueuedConnection);
-    connect(m_firebaseAuthPhone, &FirebaseQtAuthPhone::verificationCompleted, this, &Central::firebaseAuthCompleted, Qt::QueuedConnection);
-    
+    connect(m_firebaseAuthPhone, &FirebaseQtAuthPhone::codeSent, this, &Central::firebaseAuthCodeSent);
+    connect(m_firebaseAuthPhone, &FirebaseQtAuthPhone::verificationFailed, this, &Central::firebaseAuthFailed);
+    connect(m_firebaseAuthPhone, &FirebaseQtAuthPhone::verificationCompleted, this, &Central::firebaseAuthCompleted);
+
     firebase->initialize();
-    
-    
+
 Ask for a phone number authentication:
 
     m_firebaseAuthPhone->verifyPhoneNumber("+55999999999");
 
-## Compiling
+## Compiling Android
+
+This version only supports CMake, Firebase 12.3 has one link issue so for now we use 12.2.0
+Firebase-qt can download the firebase_cpp-sdk for you but on gradle part you will need to
+point to where it should be so we are not _that_ automated yet.
+
+    if(ANDROID)
+        set(FIREBASE_CPP_SDK_DIR "..path/to/firebase_cpp_sdk_12.2.0/")
+        include(FetchContent)
+        FetchContent_Declare(
+            firebase_qt
+            GIT_REPOSITORY https://github.com/cutelyst/firebase-qt.git
+            GIT_TAG        some_sha
+            EXCLUDE_FROM_ALL
+        )
+        FetchContent_MakeAvailable(firebase_qt)
+    endif()
+
+
+Now an important step is to update your gradle in you project/android director, the one that
+QtCreator created it's template, this is essential else you will run into DEX issues,
+this should be run in project_sources/android directory not on your build director.
+Also you must comment all Qt variables else it will fail:
+
+    ./gradlew wrapper --gradle-version 8.7
+
+Next gradle.properties where you also put your firebase_cpp-sdk path:
+
+    systemProp.firebase_cpp_sdk.dir=..path/to/firebase_cpp_sdk_12.2.0/
+
+Last build.gradle:
+
+    buildscript {
+        repositories {
+            google()
+            mavenCentral()
+        }
+
+        dependencies {
+            # Notice the 8.6 version here, not sure why but seems we always need to be one version less
+            # than what we updated
+            classpath 'com.android.tools.build:gradle:8.6.0'
+
+            # the lines below won't need to be changed later as the path is read from gradle.properties
+            def firebase_cpp_sdk_dir = System.getProperty('firebase_cpp_sdk.dir')
+
+            gradle.ext.firebase_cpp_sdk_dir = "$firebase_cpp_sdk_dir"
+            apply from: "$firebase_cpp_sdk_dir/Android/firebase_dependencies.gradle"
+        }
+    }
+
+    ...
+
+    # This can be placed at the end of the file
+    # You must put here all modules you want from firebase
+    firebaseCpp.dependencies {
+        analytics
+        messaging
+        auth
+    }
+
+
+## Compiling iOS (TODO)
 
 This is the most chalenging part, especially on iOS, because qmake doesn't support CocoaPods, and I'm not sure how mature Qt CMake integration is for iOS, so you have to download the C++ SDK **and** the Firebase iOS framework, here is how my qmake looks like (I'm pretty sure I can omit some links in iOS but didn't have the time to check):
 
