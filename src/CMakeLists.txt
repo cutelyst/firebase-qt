@@ -15,7 +15,7 @@ set(firebase_qt_HEADERS_PRIVATE
 )
 
 set(target_app FirebaseQt${QT_VERSION_MAJOR}_App)
-add_library(${target_app}
+add_library(${target_app} OBJECT
     ${firebase_qt_SRC}
     ${firebase_qt_HEADERS}
     ${firebase_qt_HEADERS_PRIVATE}
