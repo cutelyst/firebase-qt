@@ -72,13 +72,15 @@ void FirebaseQtAuthPhoneListener::OnVerificationCompleted(firebase::auth::PhoneA
     // `credential` can be used instead of calling GetCredential().
     FirebaseQtAuthCredential cred(new FirebaseQtAuthCredentialPrivate(credential));
     qCDebug(FIREBASE_AUTHPHONE) << "OnVerificationCompleted" << QThread::currentThreadId() << cred.isValid() << cred.provider();
-    Q_EMIT q_ptr->verificationCompleted(cred);
+
+    QMetaObject::invokeMethod(q_ptr, &FirebaseQtAuthPhone::verificationCompleted, cred);
 }
 
 void FirebaseQtAuthPhoneListener::OnVerificationFailed(const std::string &error) {
     // Verification code not sent.
     qCDebug(FIREBASE_AUTHPHONE) << "OnVerificationFailed" << QThread::currentThreadId() << QString::fromStdString(error);
-    Q_EMIT q_ptr->verificationFailed(QString::fromStdString(error));
+
+    QMetaObject::invokeMethod(q_ptr, &FirebaseQtAuthPhone::verificationFailed, QString::fromStdString(error));
 }
 
 void FirebaseQtAuthPhoneListener::OnCodeSent(const std::string &verification_id, const firebase::auth::PhoneAuthProvider::ForceResendingToken &force_resending_token) {
@@ -88,5 +90,6 @@ void FirebaseQtAuthPhoneListener::OnCodeSent(const std::string &verification_id,
     // Developer may want to save that verification_id along with other app states in case
     // the app is terminated before the user gets the SMS verification code.
     qCDebug(FIREBASE_AUTHPHONE) << "OnCodeSent" << QThread::currentThreadId() << QString::fromStdString(verification_id);
-    Q_EMIT q_ptr->codeSent(QString::fromStdString(verification_id));
+
+    QMetaObject::invokeMethod(q_ptr, &FirebaseQtAuthPhone::codeSent, QString::fromStdString(verification_id));
 }

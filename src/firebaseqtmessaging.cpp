@@ -34,7 +34,6 @@ public:
 FirebaseQtMessaging::FirebaseQtMessaging(FirebaseQtApp *parent) : FirebaseQtAbstractModule(parent)
   , d_ptr(new FirebaseQtMessagingPrivate(this))
 {
-
 }
 
 FirebaseQtMessaging::~FirebaseQtMessaging()
@@ -57,12 +56,13 @@ void FirebaseQtMessagingPrivate::OnMessage(const firebase::messaging::Message &m
         data.insert(QString::fromStdString(it->first), QString::fromStdString(it->second));
         ++it;
     }
-    Q_EMIT q_ptr->messageReceived(data);
+
+    QMetaObject::invokeMethod(q_ptr, &FirebaseQtMessaging::messageReceived, data);
 }
 
 void FirebaseQtMessagingPrivate::OnTokenReceived(const char *token)
 {
     qCDebug(FIREBASE_MESSAGING) << "OnTokenReceived" << QThread::currentThreadId() << token;
 
-    Q_EMIT q_ptr->tokenReceived(token);
+    QMetaObject::invokeMethod(q_ptr, &FirebaseQtMessaging::tokenReceived, QByteArray{token});
 }
