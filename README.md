@@ -96,6 +96,14 @@ Last build.gradle:
         auth
     }
 
+### AndroidManifest.xml
+
+With the above code you will get Firebase working, which can give you a valid device token to send notifications.
+However in order to receive them when the app is running you must add what firebase-cpp-sdk/AndroidManafest.xml
+has to your own AndroidManifest.xml.
+
+To receive notifications when the app is not running or hidden it requires Notifications permissions that
+should by programatically asked: `android.permission.POST_NOTIFICATIONS`.
 
 ## Compiling iOS (TODO)
 

@@ -86,8 +86,7 @@ void FirebaseQtApp::initialize()
     }
 
 #ifdef Q_OS_ANDROID
-    QJniEnvironment env;
-    d->app = ::firebase::App::Create(options, &*env, QNativeInterface::QAndroidApplication::context().object());
+    d->app = ::firebase::App::Create(options, QJniEnvironment::getJniEnv(), QNativeInterface::QAndroidApplication::context().object());
     Q_ASSERT_X(d->app, "FirebaseQtApp", "App::Create");
 #else
     d->app = ::firebase::App::Create();

@@ -6,7 +6,6 @@
 
 #include "firebase/messaging.h"
 
-#include <QThread>
 #include <QLoggingCategory>
 
 Q_LOGGING_CATEGORY(FIREBASE_MESSAGING, "firebase.messaging")
@@ -43,16 +42,17 @@ FirebaseQtMessaging::~FirebaseQtMessaging()
 
 void FirebaseQtMessaging::initialize(FirebaseQtApp *app)
 {
-    ::firebase::messaging::Initialize(*app->d_ptr->app, d_ptr);
+    auto result = ::firebase::messaging::Initialize(*app->d_ptr->app, d_ptr);
+    Q_ASSERT(result == ::firebase::InitResult::kInitResultSuccess);
 }
 
 void FirebaseQtMessagingPrivate::OnMessage(const firebase::messaging::Message &message)
 {
-    qCDebug(FIREBASE_MESSAGING) << "OnMessage" << QString::fromStdString(message.from) << QString::fromStdString(message.message_id) << message.data.size();
+    qDebug(FIREBASE_MESSAGING) << "OnMessage" << QString::fromStdString(message.from) << QString::fromStdString(message.message_id) << message.data.size();
     QMap<QString, QString> data;
     auto it = message.data.begin();
     while (it != message.data.end()) {
-        qDebug() << "OnMessage data:" << it->first.c_str() << it->second.c_str();
+        qDebug(FIREBASE_MESSAGING) << "OnMessage data:" << it->first.c_str() << it->second.c_str();
         data.insert(QString::fromStdString(it->first), QString::fromStdString(it->second));
         ++it;
     }
@@ -62,7 +62,7 @@ void FirebaseQtMessagingPrivate::OnMessage(const firebase::messaging::Message &m
 
 void FirebaseQtMessagingPrivate::OnTokenReceived(const char *token)
 {
-    qCDebug(FIREBASE_MESSAGING) << "OnTokenReceived" << QThread::currentThreadId() << token;
+    qCDebug(FIREBASE_MESSAGING) << "OnTokenReceived" << token;
 
     QMetaObject::invokeMethod(q_ptr, &FirebaseQtMessaging::tokenReceived, QByteArray{token});
 }
