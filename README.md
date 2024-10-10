@@ -73,6 +73,7 @@ Last build.gradle:
             # Notice the 8.6 version here, not sure why but seems we always need to be one version less
             # than what we updated
             classpath 'com.android.tools.build:gradle:8.6.0'
+            classpath 'com.google.gms:google-services:4.4.2'  // Google Services plugin
 
             # the lines below won't need to be changed later as the path is read from gradle.properties
             def firebase_cpp_sdk_dir = System.getProperty('firebase_cpp_sdk.dir')
@@ -82,6 +83,9 @@ Last build.gradle:
         }
     }
 
+    ...
+    apply plugin: 'com.android.application'
+    apply plugin: 'com.google.gms.google-services'  // Google Services plugin
     ...
 
     # This can be placed at the end of the file
