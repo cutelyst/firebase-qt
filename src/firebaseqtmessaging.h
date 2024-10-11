@@ -1,9 +1,12 @@
-#ifndef FIREBASEQTMESSAGING_H
-#define FIREBASEQTMESSAGING_H
+#pragma once
 
 #include <QObject>
 
 #include "firebaseqtabstractmodule.h"
+
+namespace firebase::messaging {
+struct Message;
+}
 
 class FirebaseQtMessagingPrivate;
 class FirebaseQtMessaging : public FirebaseQtAbstractModule
@@ -12,17 +15,15 @@ class FirebaseQtMessaging : public FirebaseQtAbstractModule
     Q_DECLARE_PRIVATE(FirebaseQtMessaging)
 public:
     explicit FirebaseQtMessaging(FirebaseQtApp *parent);
-    virtual ~FirebaseQtMessaging() override;
+    ~FirebaseQtMessaging() override;
 
 Q_SIGNALS:
     void tokenReceived(const QByteArray &token);
-    void messageReceived(const QMap<QString, QString> &data);
+    void messageReceived(const firebase::messaging::Message &message);
 
 protected:
-    virtual void initialize(FirebaseQtApp *app) override;
+    void initialize(FirebaseQtApp *app) override;
 
 private:
     FirebaseQtMessagingPrivate *d_ptr;
 };
-
-#endif // FIREBASEQTMESSAGING_H
