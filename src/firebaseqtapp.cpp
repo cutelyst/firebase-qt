@@ -1,10 +1,7 @@
 #include "firebaseqtapp.h"
 #include "firebaseqtapp_p.h"
 
-#if defined(Q_OS_ANDROID) && QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-#include <QtAndroid>
-#include <QAndroidJniEnvironment>
-#elif defined(Q_OS_ANDROID)
+#ifdef Q_OS_ANDROID
 #include <QtCore/private/qandroidextras_p.h>
 #include <QJniEnvironment>
 #endif
@@ -88,17 +85,13 @@ void FirebaseQtApp::initialize()
         options.set_project_id(d->projectId.toLatin1().constData());
     }
 
-#if defined(Q_OS_ANDROID) && QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    QAndroidJniEnvironment env;
-    d->app = ::firebase::App::Create(options, &*env, QtAndroid::androidActivity().object());
-#elif defined(Q_OS_ANDROID)
-    QJniEnvironment env;
-    d->app = ::firebase::App::Create(options, &*env, QNativeInterface::QAndroidApplication::context());
+#ifdef Q_OS_ANDROID
+    d->app = ::firebase::App::Create(options, QJniEnvironment::getJniEnv(), QNativeInterface::QAndroidApplication::context().object());
+    Q_ASSERT_X(d->app, "FirebaseQtApp", "App::Create");
 #else
     d->app = ::firebase::App::Create();
-#endif
-
     Q_ASSERT_X(d->app, "FirebaseQtApp", "App::Create");
+#endif
 
     QTimer::singleShot(0, this, [=] {
         for (FirebaseQtAbstractModule *module : d->modules) {

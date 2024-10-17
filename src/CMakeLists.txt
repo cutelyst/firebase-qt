@@ -4,12 +4,10 @@
 set(firebase_qt_SRC
     firebaseqtapp.cpp
     firebaseqtabstractmodule.cpp
-    firebaseqtmessaging.cpp
 )
 
 set(firebase_qt_HEADERS
     firebaseqtapp.h
-    firebaseqtmessaging.h
 )
 
 set(firebase_qt_HEADERS_PRIVATE
@@ -17,10 +15,11 @@ set(firebase_qt_HEADERS_PRIVATE
 )
 
 set(target_app FirebaseQt${QT_VERSION_MAJOR}_App)
-add_library(${target_app}
+add_library(${target_app} OBJECT
     ${firebase_qt_SRC}
     ${firebase_qt_HEADERS}
     ${firebase_qt_HEADERS_PRIVATE}
+    ios.swift
 )
 
 #Add an alias so that library can be used inside the build tree, e.g. when testing
@@ -182,3 +181,54 @@ install(TARGETS ${target_messaging}
     ARCHIVE DESTINATION lib COMPONENT devel
     PUBLIC_HEADER DESTINATION include/firebase-qt${QT_VERSION_MAJOR}/FirebaseQt COMPONENT devel
 )
+
+
+### iOS
+if(IOS)
+    function(create_firebase_target target_name)
+        # Get the arguments passed to the function
+        set(dependencies ${ARGN})
+
+        # Define the target as an imported library
+        add_library(${target_name} STATIC IMPORTED)
+
+        # Set properties for the imported target
+        set_target_properties(${target_name} PROPERTIES
+            IMPORTED_LOCATION "${FIREBASE_IOS_SDK_DIR}/${target_name}/${target_name}.xcframework"
+        )
+
+        # Loop over the dependencies and create imported targets for them
+        foreach(dependency ${dependencies})
+            # Define each dependency as an imported library
+            add_library(${dependency} STATIC IMPORTED)
+
+            # Set properties for the imported dependency
+            set_target_properties(${dependency} PROPERTIES
+                IMPORTED_LOCATION "${FIREBASE_IOS_SDK_DIR}/${target_name}/${dependency}.xcframework"
+            )
+
+            # Link each dependency to the main target
+            target_link_libraries(${target_name} INTERFACE ${dependency})
+        endforeach()
+    endfunction()
+
+    create_firebase_target(FirebaseAnalytics
+        FBLPromises
+        FirebaseCoreInternal
+        GoogleAppMeasurementIdentitySupport
+        FirebaseInstallations
+        GoogleUtilities
+        FirebaseCore
+        GoogleAppMeasurement
+        nanopb
+    )
+
+    create_firebase_target(FirebaseMessaging GoogleDataTransport)
+    target_link_libraries(FirebaseMessaging INTERFACE FirebaseAnalytics)
+
+    target_link_libraries(${target_messaging}
+        PRIVATE
+            FirebaseMessaging
+    )
+
+endif()
