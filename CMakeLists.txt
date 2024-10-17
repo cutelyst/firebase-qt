@@ -2,7 +2,16 @@
 # SPDX-License-Identifier: MIT
 
 cmake_minimum_required(VERSION 3.24)
-project(FirebaseQt VERSION 0.1.0 LANGUAGES CXX)
+if(IOS)
+    set(LANGUAGES CXX Swift)
+else()
+    set(LANGUAGES CXX)
+endif()
+
+project(FirebaseQt
+    VERSION 0.1.0
+    LANGUAGES ${LANGUAGES}
+)
 
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
@@ -42,6 +51,14 @@ else()
     FetchContent_MakeAvailable(firebase_cpp_sdk)
 endif()
 message(STATUS "FIREBASE_CPP_SDK_DIR=${FIREBASE_CPP_SDK_DIR}")
+
+if(IOS)
+    set(CMAKE_OSX_DEPLOYMENT_TARGET 13.0)
+    if (NOT DEFINED FIREBASE_IOS_SDK_DIR)
+        message(FATAL_ERROR "FIREBASE_IOS_SDK_DIR not defined")
+    endif()
+    message(STATUS "FIREBASE_IOS_SDK_DIR=${FIREBASE_IOS_SDK_DIR}")
+endif()
 
 set(CMAKE_AUTOMOC ON)
 
