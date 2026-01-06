@@ -21,48 +21,15 @@ add_library(${target_fb_app} OBJECT
     ${firebase_qt_HEADERS_PRIVATE}
     ios.swift
 )
-
-#Add an alias so that library can be used inside the build tree, e.g. when testing
 add_library(FirebaseQt::App ALIAS ${target_fb_app})
-
-# if (CMAKE_GENERATOR MATCHES "Visual Studio")
-#   set_property(TARGET ${target_fb_app} PROPERTY DEBUG_POSTFIX "d")
-# endif()
-
-# target_compile_definitions(${target_fb_app}
-#   PRIVATE
-#     PLUGINS_PREFER_DEBUG_POSTFIX=$<CONFIG:Debug>
-# )
-
-# target_include_directories(${target_fb_app} PUBLIC
-#   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-#   $<INSTALL_INTERFACE:include/firebase-qt${QT_VERSION_MAJOR}/FirebaseQt>
-# )
-
-# set_target_properties(${target_fb_app} PROPERTIES
-#     EXPORT_NAME App
-#     VERSION ${PROJECT_VERSION}
-#     SOVERSION 0
-# )
 
 target_link_libraries(${target_fb_app}
     PRIVATE
         Qt::Core
         Qt::CorePrivate
         Qt::Network
-        # firebase_analyticsw
         firebase_app
 )
-
-# set_property(TARGET ${target_fb_app} PROPERTY PUBLIC_HEADER ${firebase_qt_HEADERS})
-# if(NOT IOS)
-#     install(TARGETS ${target_fb_app}
-#         EXPORT FirebaseTargets DESTINATION ${CMAKE_INSTALL_LIBDIR}
-#         RUNTIME DESTINATION bin COMPONENT runtime
-#         ARCHIVE DESTINATION lib COMPONENT devel
-#         PUBLIC_HEADER DESTINATION include/firebase-qt${QT_VERSION_MAJOR}/FirebaseQt COMPONENT devel
-#     )
-# endif()
 
 # Auth
 set(firebase_qt_auth_SRC
@@ -87,29 +54,7 @@ add_library(${target_auth}
     ${firebase_qt_auth_HEADERS}
     ${firebase_qt_auth_HEADERS_PRIVATE}
 )
-
-#Add an alias so that library can be used inside the build tree, e.g. when testing
 add_library(FirebaseQt::Auth ALIAS ${target_auth})
-
-# if (CMAKE_GENERATOR MATCHES "Visual Studio")
-#   set_property(TARGET ${target_auth} PROPERTY DEBUG_POSTFIX "d")
-# endif()
-
-# target_compile_definitions(${target_auth}
-#   PRIVATE
-#     PLUGINS_PREFER_DEBUG_POSTFIX=$<CONFIG:Debug>
-# )
-
-# target_include_directories(${target_auth} PUBLIC
-#   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-#   $<INSTALL_INTERFACE:include/firebase-qt${QT_VERSION_MAJOR}/FirebaseQt>
-# )
-
-# set_target_properties(${target_auth} PROPERTIES
-#     EXPORT_NAME Auth
-#     VERSION ${PROJECT_VERSION}
-#     SOVERSION 0
-# )
 
 target_link_libraries(${target_auth}
     PRIVATE
@@ -118,17 +63,7 @@ target_link_libraries(${target_auth}
         FirebaseQt::App
 )
 
-# set_property(TARGET ${target_auth} PROPERTY PUBLIC_HEADER ${firebase_qt_auth_HEADERS})
-# if(NOT IOS)
-#     install(TARGETS ${target_auth}
-#         EXPORT FirebaseTargets DESTINATION ${CMAKE_INSTALL_LIBDIR}
-#         RUNTIME DESTINATION bin COMPONENT runtime
-#         ARCHIVE DESTINATION lib COMPONENT devel
-#         PUBLIC_HEADER DESTINATION include/firebase-qt${QT_VERSION_MAJOR}/FirebaseQt COMPONENT devel
-#     )
-# endif()
-
-### Messaging
+# Messaging
 set(firebase_qt_messaging_SRC
     firebaseqtmessaging.cpp
 )
@@ -146,29 +81,7 @@ add_library(${target_messaging} OBJECT
     ${firebase_qt_messaging_HEADERS}
     ${firebase_qt_messaging_HEADERS_PRIVATE}
 )
-
-# #Add an alias so that library can be used inside the build tree, e.g. when testing
 add_library(FirebaseQt::Messaging ALIAS ${target_messaging})
-
-# if (CMAKE_GENERATOR MATCHES "Visual Studio")
-#   set_property(TARGET ${target_messaging} PROPERTY DEBUG_POSTFIX "d")
-# endif()
-
-# target_compile_definitions(${target_messaging}
-#   PRIVATE
-#     PLUGINS_PREFER_DEBUG_POSTFIX=$<CONFIG:Debug>
-# )
-
-# target_include_directories(${target_messaging} PUBLIC
-#   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-#   $<INSTALL_INTERFACE:include/firebase-qt${QT_VERSION_MAJOR}/FirebaseQt>
-# )
-
-# set_target_properties(${target_messaging} PROPERTIES
-#     EXPORT_NAME Messaging
-#     VERSION ${PROJECT_VERSION}
-#     SOVERSION 0
-# )
 
 target_link_libraries(${target_messaging}
     PRIVATE
@@ -176,17 +89,6 @@ target_link_libraries(${target_messaging}
         firebase_messaging
         FirebaseQt::App
 )
-
-# set_property(TARGET ${target_messaging} PROPERTY PUBLIC_HEADER ${firebase_qt_HEADERS})
-# if(NOT IOS)
-#     install(TARGETS ${target_messaging}
-#         EXPORT FirebaseTargets DESTINATION ${CMAKE_INSTALL_LIBDIR}
-#         RUNTIME DESTINATION bin COMPONENT runtime
-#         ARCHIVE DESTINATION lib COMPONENT devel
-#         PUBLIC_HEADER DESTINATION include/firebase-qt${QT_VERSION_MAJOR}/FirebaseQt COMPONENT devel
-#     )
-# endif()
-
 
 ## iOS
 if(NOT IOS)

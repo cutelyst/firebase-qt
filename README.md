@@ -1,9 +1,36 @@
 # firebase-qt
-Qt Wrapper for Firebase C++ API
+Qt Wrapper for Firebase C++ API (CMake only)
 
 Supports:
  * Messaging for Push Notifications
  * Phone Authentication
+
+> It's important to note that the Firebase C++ SDK is also an wrapper around Firebase iOS and Android libraries.
+
+It's also important to use the right Firebase SDK with the right version of iOS and or Android libraries, such as
+Firebase C++ SDK 13.3.0 with Firebase iOS SDK 12.6.0.
+
+Since these libraries take a lot of disk space it's recommended to save them under a directory that is not in
+your source tree such as:
+
+```
+code/
+    my_app/
+    firebase_sdk/
+        firebase_cpp_sdk_13.3.0/
+        firebase_ios_sdk_12.6.0/
+```
+
+Then set in your CMake:
+```
+set(FIREBASE_CPP_SDK_DIR "${CMAKE_SOURCE_DIR}/../firebase_sdk/firebase_cpp_sdk_13.3.0" CACHE STRING "" FORCE)
+set(FIREBASE_IOS_SDK_DIR "${CMAKE_SOURCE_DIR}/../firebase_sdk/firebase_ios_12.6.0" CACHE STRING "" FORCE)
+```
+
+Download them from:
+- https://github.com/firebase/firebase-cpp-sdk/releases/tag/v13.3.0 (click "Prebuilt versions of the libraries are available for download **HERE**")
+- https://github.com/firebase/firebase-ios-sdk/releases/tag/12.6.0 (Firebase.zip)
+
 
 ## Example of usage
 
@@ -31,14 +58,25 @@ Ask for a phone number authentication:
 
     m_firebaseAuthPhone->verifyPhoneNumber("+55999999999");
 
+Link with what you need:
+
+```
+target_link_libraries(${app_target}
+    PRIVATE
+        FirebaseQt::Messaging
+        FirebaseQt::Auth
+        FirebaseQt::App
+)
+```
+
 ## Compiling Android
 
-This version only supports CMake, Firebase 12.3 has one link issue so for now we use 12.2.0
+This version only supports CMake, Firebase 13.3 has one link issue so for now we use 12.2.0
 Firebase-qt can download the firebase_cpp-sdk for you but on gradle part you will need to
 point to where it should be so we are not _that_ automated yet.
 
     if(ANDROID)
-        set(FIREBASE_CPP_SDK_DIR "..path/to/firebase_cpp_sdk_12.2.0/")
+        set(FIREBASE_CPP_SDK_DIR "..path/to/firebase_cpp_sdk_13.3.0/")
         include(FetchContent)
         FetchContent_Declare(
             firebase_qt
@@ -59,7 +97,7 @@ Also you must comment all Qt variables else it will fail:
 
 Next gradle.properties where you also put your firebase_cpp-sdk path:
 
-    systemProp.firebase_cpp_sdk.dir=..path/to/firebase_cpp_sdk_12.2.0/
+    systemProp.firebase_cpp_sdk.dir=..path/to/firebase_cpp_sdk_13.3.0/
 
 Last build.gradle:
 
@@ -105,200 +143,100 @@ has to your own AndroidManifest.xml.
 To receive notifications when the app is not running or hidden it requires Notifications permissions that
 should by programatically asked: `android.permission.POST_NOTIFICATIONS`.
 
-## Compiling iOS (TODO)
+## Compiling iOS
 
-This is the most chalenging part, especially on iOS, because qmake doesn't support CocoaPods, and I'm not sure how mature Qt CMake integration is for iOS, so you have to download the C++ SDK **and** the Firebase iOS framework, here is how my qmake looks like (I'm pretty sure I can omit some links in iOS but didn't have the time to check):
+I'm trying to improve things on iOS, but so far it's in a better shape than qmake was.
 
-        QT += quick svg
-    CONFIG += c++11
-    TARGET = 'my-app'
+`app_target` is the name of your application target, this function is present in the FirebaseQt CMake files
+but I did not manage to get the app building if I run it there, so for now just add it
 
-    android: {
-        QT += androidextras
-    }
-    android|ios {
-        CONFIG += qtquickcompiler
-    }
+```
+if(IOS)
+    function(create_firebase_target target_name)
+        # Get the arguments passed to the function
+        set(dependencies ${ARGN})
 
-    # The following define makes your compiler emit warnings if you use
-    # any Qt feature that has been marked deprecated (the exact warnings
-    # depend on your compiler). Refer to the documentation for the
-    # deprecated API to know how to port your code away from it.
-    DEFINES += QT_DEPRECATED_WARNINGS
+        # Define the target as an imported library
+        add_library(${target_name} STATIC IMPORTED)
 
-    # You can also make your code fail to compile if it uses deprecated APIs.
-    # In order to do so, uncomment the following line.
-    # You can also select to disable deprecated APIs only up to a certain version of Qt.
-    #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
+        # Set properties for the imported target
+        set_target_properties(${target_name} PROPERTIES
+            IMPORTED_LOCATION "${FIREBASE_IOS_SDK_DIR}/${target_name}/${target_name}.xcframework"
+        )
 
-    SOURCES += \
-        main.cpp
+        # Loop over the dependencies and create imported targets for them
+        foreach(dependency ${dependencies})
+            # Define each dependency as an imported library
+            add_library(${dependency} STATIC IMPORTED)
 
-    android|ios {
-        SOURCES += \
-            firebaseqtapp.cpp \
-            firebaseqtauth.cpp \
-            firebaseqtauthcredential.cpp \
-            firebaseqtmessaging.cpp \
-            firebaseqtauthphone.cpp \
-            firebaseqtabstractmodule.cpp
-    }
+            # Set properties for the imported dependency
+            set_target_properties(${dependency} PROPERTIES
+                IMPORTED_LOCATION "${FIREBASE_IOS_SDK_DIR}/${target_name}/${dependency}.xcframework"
+            )
 
-    RESOURCES += qml.qrc
+            # Link each dependency to the main target
+            target_link_libraries(${target_name} INTERFACE ${dependency})
+        endforeach()
+    endfunction()
 
-    # Additional import path used to resolve QML modules in Qt Creator's code model
-    QML_IMPORT_PATH =
+    create_firebase_target(FirebaseAnalytics
+        FBLPromises
+        FirebaseCoreInternal
+        GoogleAppMeasurementIdentitySupport
+        FirebaseInstallations
+        GoogleUtilities
+        FirebaseCore
+        GoogleAppMeasurement
+        nanopb
+    )
 
-    # Additional import path used to resolve QML modules just for Qt Quick Designer
-    QML_DESIGNER_IMPORT_PATH =
+    create_firebase_target(FirebaseMessaging GoogleDataTransport)
+    target_link_libraries(FirebaseMessaging INTERFACE FirebaseAnalytics)
 
-    # Default rules for deployment.
-    qnx: target.path = /tmp/$${TARGET}/bin
-    else: unix:!android: target.path = /opt/$${TARGET}/bin
-    !isEmpty(target.path): INSTALLS += target
+    target_link_libraries(${app_target}
+        PRIVATE
+            FirebaseMessaging
+    )
 
-    android|ios {
-        HEADERS += \
-            firebaseqtabstractmodule.h \
-            firebaseqtapp.h \
-            firebaseqtapp_p.h \
-            firebaseqtauth.h \
-            firebaseqtauth_p.h \
-            firebaseqtauthcredential.h \
-            firebaseqtauthcredential_p.h \
-            firebaseqtmessaging.h \
-            firebaseqtauthphone.h
-    }
+    target_link_directories(${app_target} PRIVATE
+    "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/${CMAKE_OSX_SYSROOT}")
 
-    DISTFILES += \
-        android/AndroidManifest.xml \
-        android/gradle/wrapper/gradle-wrapper.jar \
-        android/gradlew \
-        android/res/values/libs.xml \
-        android/build.gradle \
-        android/gradle/wrapper/gradle-wrapper.properties \
-        android/gradlew.bat \
-        android/google-services.json
+    set(asset_catalog_path
+        ios/Assets.xcassets
+        ios/GoogleService-Info.plist
+    )
+    target_sources(${app_target} PRIVATE "${asset_catalog_path}")
+    set_source_files_properties(
+        ${asset_catalog_path}
+        PROPERTIES MACOSX_PACKAGE_LOCATION Resources
+    )
 
-    CLIENT_DIR = my-app
+    set_target_properties(${app_target}
+        PROPERTIES
+            MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/ios/Info.plist"
+            XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS "${CMAKE_CURRENT_SOURCE_DIR}/ios/${app_target}.entitlements"
+            XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME AppIcon
+            XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1"
+    )
+endif()
+```
 
-    GOOGLE_FIREBASE_SDK = $$PWD/../firebase_cpp_sdk
-    GOOGLE_IOS_FIREBASE_SDK = $$PWD/../Firebase
+Where `Assets.xcassets` is not important for Firebase but you will likely have it due your App's icons.
 
-    INCLUDEPATH += $${GOOGLE_FIREBASE_SDK}/include
-    DEPENDPATH += $${GOOGLE_FIREBASE_SDK}/include
+Info.plist should have your App's information and be sure to add:
+```
+<key>FirebaseAppDelegateProxyEnabled</key>
+<true/>
+```
 
-    contains(ANDROID_TARGET_ARCH,armeabi-v7a) {
-        ANDROID_PACKAGE_SOURCE_DIR = \
-            $$PWD/android
-
-        ANDROID_EXTRA_LIBS = \
-        $$PWD/../android_openssl/arm/libcrypto_1_1.so \
-        $$PWD/../android_openssl/arm/libssl_1_1.so
-
-        LIBS += -L$${GOOGLE_FIREBASE_SDK}/libs/android/armeabi-v7a/c++/ -lfirebase_app -lfirebase_messaging -lfirebase_auth
-
-        PRE_TARGETDEPS += $${GOOGLE_FIREBASE_SDK}/libs/android/armeabi-v7a/c++/libfirebase_app.a
-        PRE_TARGETDEPS += $${GOOGLE_FIREBASE_SDK}/libs/android/armeabi-v7a/c++/libfirebase_messaging.a
-        PRE_TARGETDEPS += $${GOOGLE_FIREBASE_SDK}/libs/android/armeabi-v7a/c++/libfirebase_auth.a
-    }
-
-    contains(ANDROID_TARGET_ARCH,arm64-v8a) {
-        ANDROID_PACKAGE_SOURCE_DIR = \
-            $$PWD/android
-
-        ANDROID_EXTRA_LIBS = \
-        $$PWD/../android_openssl/arm64/libssl_1_1.so \
-        $$PWD/../android_openssl/arm64/libcrypto_1_1.so
-
-        LIBS += -L$${GOOGLE_FIREBASE_SDK}/libs/android/arm64-v8a/c++/ -lfirebase_app -lfirebase_messaging -lfirebase_auth
-
-        PRE_TARGETDEPS += $${GOOGLE_FIREBASE_SDK}/libs/android/arm64-v8a/c++/libfirebase_app.a
-        PRE_TARGETDEPS += $${GOOGLE_FIREBASE_SDK}/libs/android/arm64-v8a/c++/libfirebase_messaging.a
-        PRE_TARGETDEPS += $${GOOGLE_FIREBASE_SDK}/libs/android/arm64-v8a/c++/libfirebase_auth.a
-    }
-
-    ios: {
-        GOOGLE_FIREBASE_SDK_LIBS_PATH = $${GOOGLE_FIREBASE_SDK}/libs/ios/universal/
-        GOOGLE_FIREBASE_SDK_FW_PATH = $${GOOGLE_FIREBASE_SDK}/frameworks/ios/universal/
-        PRODUCT_NAME = 'my-app'
-        QMAKE_APPLE_TARGETED_DEVICE_FAMILY = 1
-
-        QMAKE_ASSET_CATALOGS = $$CLIENT_DIR/ios/Images.xcassets
-        QMAKE_ASSET_CATALOGS_APP_ICON = "AppIcon"
-
-        MY_ENTITLEMENTS.name = CODE_SIGN_ENTITLEMENTS
-        MY_ENTITLEMENTS.value = $$PWD/$$CLIENT_DIR/ios/my-app.entitlements
-        QMAKE_MAC_XCODE_SETTINGS += MY_ENTITLEMENTS
-
-        app_launch_images.files = icons/logo.jpeg $$CLIENT_DIR/ios/splash/Launch.xib $$files($$CLIENT_DIR/ios/splash/LaunchImage*.png)
-        QMAKE_BUNDLE_DATA += app_launch_images
-
-        QMAKE_INFO_PLIST = $$CLIENT_DIR/ios/Info.plist
-
-        DISTFILES += \
-            $$CLIENT_DIR/ios/Info.plist \
-            $$CLIENT_DIR/ios/GoogleService-Info.plist \
-
-        # You must deploy your Google Play config file
-        deployment.files = $$CLIENT_DIR/ios/GoogleService-Info.plist
-        deployment.path =
-        QMAKE_BUNDLE_DATA += deployment
-
-        QMAKE_LFLAGS += -ObjC
-
-        LIBS += \
-            -ObjC \
-            -lsqlite3 \
-            -lz \
-            -L$${GOOGLE_FIREBASE_SDK_LIBS_PATH} \
-            -framework MediaPlayer \
-            -framework CoreMotion \
-            -framework CoreTelephony \
-            -framework MessageUI \
-            -framework GLKit \
-            -framework AddressBook \
-            -framework CoreFoundation \
-            -framework Foundation \
-            -framework Security \
-            -framework UIKit \
-            -framework SystemConfiguration \
-            -framework GSS
-
-        LIBS +=  \
-                -framework StoreKit \
-                -F$${GOOGLE_IOS_FIREBASE_SDK}/Analytics \
-                -framework FirebaseAnalytics \
-                -framework FirebaseCore \
-                -framework FirebaseCoreDiagnostics \
-                -framework FirebaseInstanceID \
-                -framework GoogleDataTransport \
-                -framework GoogleDataTransportCCTSupport \
-                -framework GoogleAppMeasurement \
-                -framework GoogleUtilities \
-                -framework nanopb
-
-        LIBS +=  \
-        -F$${GOOGLE_IOS_FIREBASE_SDK}/Messaging \
-        -framework FirebaseMessaging \
-        -framework Protobuf \
-        -framework UserNotifications
-
-        LIBS +=  \
-        -F$${GOOGLE_FIREBASE_SDK_FW_PATH} \
-        -framework firebase_messaging \
-        \
-
-        LIBS +=  \
-        -F$${GOOGLE_IOS_FIREBASE_SDK}/Auth \
-        -framework FirebaseAuth \
-        -framework GTMSessionFetcher \
-        -framework SafariServices
-
-        LIBS +=  \
-        -F$${GOOGLE_FIREBASE_SDK_FW_PATH} \
-        -framework firebase_auth \
-        -framework firebase \
-        \
-
-    }
+`${app_target}.entitlements` should have the following content:
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>aps-environment</key>
+    <string>development</string>
+</dict>
+</plist>
+```
