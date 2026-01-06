@@ -1,16 +1,14 @@
-# SPDX-FileCopyrightText: (C) 2022 Daniel Nicoletti <dantti12@gmail.com>
+# SPDX-FileCopyrightText: (C) 2022-2026 Daniel Nicoletti <dantti12@gmail.com>
 # SPDX-License-Identifier: MIT
 
-cmake_minimum_required(VERSION 3.24)
-if(IOS)
-    set(LANGUAGES CXX Swift)
-else()
-    set(LANGUAGES CXX)
-endif()
+cmake_minimum_required(VERSION 3.30)
 
+# We need Swift LANGUAGE but if we add it in project
+# clang++ fails to build due no_warn_duplicate_libraries being an
+# undefined flag
 project(FirebaseQt
     VERSION 0.1.0
-    LANGUAGES ${LANGUAGES}
+    LANGUAGES CXX
 )
 
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
@@ -23,14 +21,14 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
 # to always look for includes there:
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-include(GNUInstallDirs)
+# include(GNUInstallDirs)
 
-find_package(QT NAMES Qt6 COMPONENTS Core Network REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR} 6.4 COMPONENTS Core Network REQUIRED)
+# find_package(QT NAMES Qt6 COMPONENTS Core Network REQUIRED)
+# find_package(Qt${QT_VERSION_MAJOR} 6.4 COMPONENTS Core Network REQUIRED)
 
 if (DEFINED FIREBASE_CPP_SDK_DIR)
     # Add Firebase libraries to the target using the function from the SDK.
@@ -53,7 +51,6 @@ endif()
 message(STATUS "FIREBASE_CPP_SDK_DIR=${FIREBASE_CPP_SDK_DIR}")
 
 if(IOS)
-    set(CMAKE_OSX_DEPLOYMENT_TARGET 13.0)
     if (NOT DEFINED FIREBASE_IOS_SDK_DIR)
         message(FATAL_ERROR "FIREBASE_IOS_SDK_DIR not defined")
     endif()
@@ -62,18 +59,18 @@ endif()
 
 set(CMAKE_AUTOMOC ON)
 
-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  set(CMAKE_INSTALL_PREFIX
-    "/usr" CACHE PATH "firebase admin default install prefix" FORCE)
-endif()
+# if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+#   set(CMAKE_INSTALL_PREFIX
+#     "/usr" CACHE PATH "firebase admin default install prefix" FORCE)
+# endif()
 
-set(CMAKE_INSTALL_LIBDIR "${CMAKE_INSTALL_PREFIX}/lib/${CMAKE_LIBRARY_ARCHITECTURE}" CACHE PATH "Output directory for libraries")
+# set(CMAKE_INSTALL_LIBDIR "${CMAKE_INSTALL_PREFIX}/lib/${CMAKE_LIBRARY_ARCHITECTURE}" CACHE PATH "Output directory for libraries")
 
-option(BUILD_SHARED_LIBS "Build in shared lib mode" OFF)
+# option(BUILD_SHARED_LIBS "Build in shared lib mode" OFF)
 
-include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}/FirebaseQt
-)
+# include_directories(
+#     ${CMAKE_CURRENT_SOURCE_DIR}/FirebaseQt
+# )
 
 # cmake config files
 # configure_file(${CMAKE_MODULE_PATH}/firebase-qt-config.cmake.in
@@ -89,14 +86,14 @@ include_directories(
 #     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/FirebaseQt${QT_VERSION_MAJOR}/
 # )
 
-if(NOT IOS)
-    install(EXPORT FirebaseTargets
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/FirebaseQt${QT_VERSION_MAJOR}/
-        FILE Firebase${PROJECT_VERSION_MAJOR}Qt${QT_VERSION_MAJOR}Targets.cmake
-        NAMESPACE FirebaseQt::
-        COMPONENT Devel
-    )
-endif()
+# if(NOT IOS)
+#     install(EXPORT FirebaseTargets
+#         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/FirebaseQt${QT_VERSION_MAJOR}/
+#         FILE Firebase${PROJECT_VERSION_MAJOR}Qt${QT_VERSION_MAJOR}Targets.cmake
+#         NAMESPACE FirebaseQt::
+#         COMPONENT Devel
+#     )
+# endif()
 
 add_subdirectory(src)
-include(CPackConfig)
+# include(CPackConfig)
