@@ -89,12 +89,14 @@ include_directories(
 #     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/FirebaseQt${QT_VERSION_MAJOR}/
 # )
 
-install(EXPORT FirebaseTargets
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/FirebaseQt${QT_VERSION_MAJOR}/
-    FILE Firebase${PROJECT_VERSION_MAJOR}Qt${QT_VERSION_MAJOR}Targets.cmake
-    NAMESPACE FirebaseQt::
-    COMPONENT Devel
-)
+if(NOT IOS)
+    install(EXPORT FirebaseTargets
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/FirebaseQt${QT_VERSION_MAJOR}/
+        FILE Firebase${PROJECT_VERSION_MAJOR}Qt${QT_VERSION_MAJOR}Targets.cmake
+        NAMESPACE FirebaseQt::
+        COMPONENT Devel
+    )
+endif()
 
 add_subdirectory(src)
 include(CPackConfig)
