@@ -1,13 +1,15 @@
 #ifndef FIREBASEQTAPP_P_H
 #define FIREBASEQTAPP_P_H
 
-#include <QString>
-#include <vector>
-
-#include <firebase/app.h>
 #include "firebaseqtabstractmodule.h"
 
-class FirebaseQtAppPrivate {
+#include <firebase/app.h>
+#include <vector>
+
+#include <QString>
+
+class FirebaseQtAppPrivate
+{
 public:
     QString appId;
     QString apiKey;

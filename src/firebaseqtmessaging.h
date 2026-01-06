@@ -1,8 +1,8 @@
 #pragma once
 
-#include <QObject>
-
 #include "firebaseqtabstractmodule.h"
+
+#include <QObject>
 
 namespace firebase::messaging {
 struct Message;

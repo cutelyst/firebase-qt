@@ -8,7 +8,7 @@ class FirebaseQtAuthPrivate
 {
 public:
     FirebaseQtAuthStateListener *stateListener = nullptr;
-    firebase::auth::Auth *auth = nullptr;
+    firebase::auth::Auth *auth                 = nullptr;
 };
 
 #endif // FIREBASEQTAUTH_P_H
