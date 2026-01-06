@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 3.30)
 # clang++ fails to build due no_warn_duplicate_libraries being an
 # undefined flag
 project(FirebaseQt
-    VERSION 0.1.0
+    VERSION 1.0.0
     LANGUAGES CXX
 )
 
