@@ -25,10 +25,10 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# include(GNUInstallDirs)
+set(CMAKE_AUTOMOC ON)
 
-# find_package(QT NAMES Qt6 COMPONENTS Core Network REQUIRED)
-# find_package(Qt${QT_VERSION_MAJOR} 6.4 COMPONENTS Core Network REQUIRED)
+find_package(QT NAMES Qt6 COMPONENTS Core Network REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR} 6.4 COMPONENTS Core Network REQUIRED)
 
 if (DEFINED FIREBASE_CPP_SDK_DIR)
     # Add Firebase libraries to the target using the function from the SDK.
@@ -57,43 +57,4 @@ if(IOS)
     message(STATUS "FIREBASE_IOS_SDK_DIR=${FIREBASE_IOS_SDK_DIR}")
 endif()
 
-set(CMAKE_AUTOMOC ON)
-
-# if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-#   set(CMAKE_INSTALL_PREFIX
-#     "/usr" CACHE PATH "firebase admin default install prefix" FORCE)
-# endif()
-
-# set(CMAKE_INSTALL_LIBDIR "${CMAKE_INSTALL_PREFIX}/lib/${CMAKE_LIBRARY_ARCHITECTURE}" CACHE PATH "Output directory for libraries")
-
-# option(BUILD_SHARED_LIBS "Build in shared lib mode" OFF)
-
-# include_directories(
-#     ${CMAKE_CURRENT_SOURCE_DIR}/FirebaseQt
-# )
-
-# cmake config files
-# configure_file(${CMAKE_MODULE_PATH}/firebase-qt-config.cmake.in
-#     ${CMAKE_CURRENT_BINARY_DIR}/FirebaseQt${QT_VERSION_MAJOR}Config.cmake
-#     @ONLY
-# )
-# configure_file(${CMAKE_MODULE_PATH}/firebase-qt-config-version.cmake.in
-#     ${CMAKE_CURRENT_BINARY_DIR}/FirebaseQt${QT_VERSION_MAJOR}ConfigVersion.cmake
-#     @ONLY
-# )
-# install(FILES ${CMAKE_CURRENT_BINARY_DIR}/FirebaseQt${QT_VERSION_MAJOR}Config.cmake
-#     ${CMAKE_CURRENT_BINARY_DIR}/FirebaseQt${QT_VERSION_MAJOR}ConfigVersion.cmake
-#     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/FirebaseQt${QT_VERSION_MAJOR}/
-# )
-
-# if(NOT IOS)
-#     install(EXPORT FirebaseTargets
-#         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/FirebaseQt${QT_VERSION_MAJOR}/
-#         FILE Firebase${PROJECT_VERSION_MAJOR}Qt${QT_VERSION_MAJOR}Targets.cmake
-#         NAMESPACE FirebaseQt::
-#         COMPONENT Devel
-#     )
-# endif()
-
 add_subdirectory(src)
-# include(CPackConfig)
