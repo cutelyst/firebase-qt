@@ -1,9 +1,9 @@
 #ifndef FIREBASEQTAUTH_H
 #define FIREBASEQTAUTH_H
 
-#include <QObject>
-
 #include "firebaseqtabstractmodule.h"
+
+#include <QObject>
 
 class FirebaseQtApp;
 class FirebaseQtAuthCredential;

@@ -14,7 +14,8 @@ public:
     virtual ~FirebaseQtAuthPhone();
 
     void verifyPhoneNumber(const QString &phoneNumber);
-    FirebaseQtAuthCredential getCredential(const QString &verificationId, const QString &code) const;
+    FirebaseQtAuthCredential getCredential(const QString &verificationId,
+                                           const QString &code) const;
 
 Q_SIGNALS:
     void verificationCompleted(const FirebaseQtAuthCredential &credential);
@@ -24,4 +25,3 @@ Q_SIGNALS:
 private:
     FirebaseQtAuthPhonePrivate *d_ptr;
 };
-

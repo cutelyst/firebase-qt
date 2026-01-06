@@ -1,24 +1,24 @@
 #include "firebaseqtapp.h"
+
 #include "firebaseqtapp_p.h"
 
 #ifdef Q_OS_ANDROID
-#include <QtCore/private/qandroidextras_p.h>
-#include <QJniEnvironment>
+#    include <QJniEnvironment>
+#    include <QtCore/private/qandroidextras_p.h>
 #endif
 
 #include "firebase/messaging.h"
-
 #include "firebaseqtabstractmodule.h"
 
-#include <QTimer>
 #include <QLoggingCategory>
+#include <QTimer>
 
 Q_LOGGING_CATEGORY(FIREBASE_APP, "firebase.app")
 
-FirebaseQtApp::FirebaseQtApp(QObject *parent) : QObject(parent)
-  , d_ptr(new FirebaseQtAppPrivate)
+FirebaseQtApp::FirebaseQtApp(QObject *parent)
+    : QObject(parent)
+    , d_ptr(new FirebaseQtAppPrivate)
 {
-
 }
 
 FirebaseQtApp::~FirebaseQtApp()
@@ -86,7 +86,9 @@ void FirebaseQtApp::initialize()
     }
 
 #ifdef Q_OS_ANDROID
-    d->app = ::firebase::App::Create(options, QJniEnvironment::getJniEnv(), QNativeInterface::QAndroidApplication::context().object());
+    d->app = ::firebase::App::Create(options,
+                                     QJniEnvironment::getJniEnv(),
+                                     QNativeInterface::QAndroidApplication::context().object());
     Q_ASSERT_X(d->app, "FirebaseQtApp", "App::Create");
 #else
     d->app = ::firebase::App::Create();
