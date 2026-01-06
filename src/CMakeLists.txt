@@ -52,16 +52,17 @@ target_link_libraries(${target_app}
         Qt${QT_VERSION_MAJOR}::Network
         firebase_analytics
         firebase_app
-        firebase_messaging
 )
 
 set_property(TARGET ${target_app} PROPERTY PUBLIC_HEADER ${firebase_qt_HEADERS})
-install(TARGETS ${target_app}
-    EXPORT FirebaseTargets DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION bin COMPONENT runtime
-    ARCHIVE DESTINATION lib COMPONENT devel
-    PUBLIC_HEADER DESTINATION include/firebase-qt${QT_VERSION_MAJOR}/FirebaseQt COMPONENT devel
-)
+if(NOT IOS)
+    install(TARGETS ${target_app}
+        EXPORT FirebaseTargets DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION bin COMPONENT runtime
+        ARCHIVE DESTINATION lib COMPONENT devel
+        PUBLIC_HEADER DESTINATION include/firebase-qt${QT_VERSION_MAJOR}/FirebaseQt COMPONENT devel
+    )
+endif()
 
 ## Auth
 set(firebase_qt_auth_SRC
@@ -118,12 +119,14 @@ target_link_libraries(${target_auth}
 )
 
 set_property(TARGET ${target_auth} PROPERTY PUBLIC_HEADER ${firebase_qt_auth_HEADERS})
-install(TARGETS ${target_auth}
-    EXPORT FirebaseTargets DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION bin COMPONENT runtime
-    ARCHIVE DESTINATION lib COMPONENT devel
-    PUBLIC_HEADER DESTINATION include/firebase-qt${QT_VERSION_MAJOR}/FirebaseQt COMPONENT devel
-)
+if(NOT IOS)
+    install(TARGETS ${target_auth}
+        EXPORT FirebaseTargets DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION bin COMPONENT runtime
+        ARCHIVE DESTINATION lib COMPONENT devel
+        PUBLIC_HEADER DESTINATION include/firebase-qt${QT_VERSION_MAJOR}/FirebaseQt COMPONENT devel
+    )
+endif()
 
 ### Messaging
 set(firebase_qt_messaging_SRC
@@ -175,12 +178,14 @@ target_link_libraries(${target_messaging}
 )
 
 set_property(TARGET ${target_messaging} PROPERTY PUBLIC_HEADER ${firebase_qt_HEADERS})
-install(TARGETS ${target_messaging}
-    EXPORT FirebaseTargets DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION bin COMPONENT runtime
-    ARCHIVE DESTINATION lib COMPONENT devel
-    PUBLIC_HEADER DESTINATION include/firebase-qt${QT_VERSION_MAJOR}/FirebaseQt COMPONENT devel
-)
+if(NOT IOS)
+    install(TARGETS ${target_messaging}
+        EXPORT FirebaseTargets DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION bin COMPONENT runtime
+        ARCHIVE DESTINATION lib COMPONENT devel
+        PUBLIC_HEADER DESTINATION include/firebase-qt${QT_VERSION_MAJOR}/FirebaseQt COMPONENT devel
+    )
+endif()
 
 
 ### iOS
