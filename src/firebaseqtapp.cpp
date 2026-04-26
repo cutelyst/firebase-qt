@@ -83,7 +83,8 @@ void FirebaseQtApp::initialize() {
   Q_ASSERT_X(d->app, "FirebaseQtApp", "App::Create");
 #endif
 
-  QTimer::singleShot(0, this, [=] {
+  QTimer::singleShot(0, this, [this] {
+    Q_D(FirebaseQtApp);
     for (FirebaseQtAbstractModule *module : d->modules) {
       module->initialize(this);
     }

@@ -26,7 +26,6 @@ add_library(FirebaseQt::App ALIAS ${target_fb_app})
 target_link_libraries(${target_fb_app}
     PRIVATE
         Qt::Core
-        Qt::CorePrivate
         Qt::Network
         firebase_app
 )
