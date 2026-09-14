@@ -4,26 +4,20 @@
 
 #include <QString>
 
-FirebaseQtAuthCredential::FirebaseQtAuthCredential(FirebaseQtAuthCredentialPrivate *priv)
-    : d(priv)
-{
+FirebaseQtAuthCredential::FirebaseQtAuthCredential(
+    FirebaseQtAuthCredentialPrivate *priv)
+    : d(priv) {}
+
+FirebaseQtAuthCredential::FirebaseQtAuthCredential(
+    const FirebaseQtAuthCredential &other)
+    : d(other.d) {}
+
+FirebaseQtAuthCredential::~FirebaseQtAuthCredential() {}
+
+QString FirebaseQtAuthCredential::provider() const {
+  return QString::fromStdString(d->credential.provider());
 }
 
-FirebaseQtAuthCredential::FirebaseQtAuthCredential(const FirebaseQtAuthCredential &other)
-    : d(other.d)
-{
-}
-
-FirebaseQtAuthCredential::~FirebaseQtAuthCredential()
-{
-}
-
-QString FirebaseQtAuthCredential::provider() const
-{
-    return QString::fromStdString(d->credential.provider());
-}
-
-bool FirebaseQtAuthCredential::isValid() const
-{
-    return d->credential.is_valid();
+bool FirebaseQtAuthCredential::isValid() const {
+  return d->credential.is_valid();
 }

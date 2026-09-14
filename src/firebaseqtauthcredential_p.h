@@ -5,14 +5,11 @@
 
 #include <QSharedData>
 
-class FirebaseQtAuthCredentialPrivate : public QSharedData
-{
+class FirebaseQtAuthCredentialPrivate : public QSharedData {
 public:
-    FirebaseQtAuthCredentialPrivate(::firebase::auth::Credential cred)
-        : credential(cred)
-    {
-    }
-    ::firebase::auth::Credential credential;
+  FirebaseQtAuthCredentialPrivate(::firebase::auth::Credential cred)
+      : credential(cred) {}
+  ::firebase::auth::Credential credential;
 };
 
 #endif // FIREBASEQTAUTHCREDENTIAL_P_H
