@@ -40,7 +40,7 @@ else()
     include(FetchContent)
     FetchContent_Declare(
         firebase_cpp_sdk
-        URL https://dl.google.com/firebase/sdk/cpp/firebase_cpp_sdk_12.2.0.zip
+        URL https://dl.google.com/firebase/sdk/cpp/firebase_cpp_sdk_13.13.0.zip
     )
 
     # MakeAvailable will run the CMakeList.txt script that was downloaded
