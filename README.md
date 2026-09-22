@@ -8,7 +8,10 @@ Supports:
 > It's important to note that the Firebase C++ SDK is also an wrapper around Firebase iOS and Android libraries.
 
 It's also important to use the right Firebase SDK with the right version of iOS and or Android libraries, such as
-Firebase C++ SDK 13.3.0 with Firebase iOS SDK 12.6.0.
+Firebase C++ SDK 13.13.0 with Firebase iOS SDK 12.19.0.
+
+FID-based messaging registration requires Firebase C++ SDK **≥ 13.12.0** and Firebase iOS SDK **≥ 12.18.0**
+(12.18.0 fixes a cached legacy-token bug when `FirebaseMessagingInstallationIdEnabled` is enabled).
 
 Since these libraries take a lot of disk space it's recommended to save them under a directory that is not in
 your source tree such as:
@@ -17,19 +20,19 @@ your source tree such as:
 code/
     my_app/
     firebase_sdk/
-        firebase_cpp_sdk_13.3.0/
-        firebase_ios_sdk_12.6.0/
+        firebase_cpp_sdk_13.13.0/
+        firebase_ios_sdk_12.19.0/
 ```
 
 Then set in your CMake:
 ```
-set(FIREBASE_CPP_SDK_DIR "${CMAKE_SOURCE_DIR}/../firebase_sdk/firebase_cpp_sdk_13.3.0" CACHE STRING "" FORCE)
-set(FIREBASE_IOS_SDK_DIR "${CMAKE_SOURCE_DIR}/../firebase_sdk/firebase_ios_12.6.0" CACHE STRING "" FORCE)
+set(FIREBASE_CPP_SDK_DIR "${CMAKE_SOURCE_DIR}/../firebase_sdk/firebase_cpp_sdk_13.13.0" CACHE STRING "" FORCE)
+set(FIREBASE_IOS_SDK_DIR "${CMAKE_SOURCE_DIR}/../firebase_sdk/firebase_ios_12.19.0" CACHE STRING "" FORCE)
 ```
 
 Download them from:
-- https://github.com/firebase/firebase-cpp-sdk/releases/tag/v13.3.0 (click "Prebuilt versions of the libraries are available for download **HERE**")
-- https://github.com/firebase/firebase-ios-sdk/releases/tag/12.6.0 (Firebase.zip)
+- https://github.com/firebase/firebase-cpp-sdk/releases/tag/v13.13.0 (click "Prebuilt versions of the libraries are available for download **HERE**")
+- https://github.com/firebase/firebase-ios-sdk/releases/tag/12.19.0 (Firebase.zip)
 
 
 ## Example of usage
@@ -40,7 +43,7 @@ Initialize:
 
     auto firebase = new FirebaseQtApp(this);
     auto messaging = new FirebaseQtMessaging(firebase);
-    connect(messaging, &FirebaseQtMessaging::tokenReceived, this, &Central::firebaseUpdateMessagingToken);
+    connect(messaging, &FirebaseQtMessaging::registrationReceived, this, &Central::firebaseUpdateMessagingRegistration);
     connect(messaging, &FirebaseQtMessaging::messageReceived, this, &Central::firebaseOnMessage);
 
     m_firebaseAuth = new FirebaseQtAuth(firebase);
@@ -69,14 +72,74 @@ target_link_libraries(${app_target}
 )
 ```
 
+## Messaging: FID registration (replaces FCM tokens)
+
+Firebase has deprecated FCM registration tokens in favor of registering the app instance with FCM via the
+Firebase Installation ID (FID). `FirebaseQtMessaging::registrationReceived` delivers that FID.
+
+### Client
+
+Connect to `registrationReceived` and upload the FID to your backend. Prefer that over the deprecated
+`tokenReceived` signal.
+
+If auto-init is disabled, call `registerInstance()` after the user consents (and `unregisterInstance()` to stop).
+
+### Backend
+
+Send with the Admin SDK / HTTP v1 **`fid`** field (not deprecated `token`):
+
+```js
+const message = {
+  data: { score: '850', time: '2:45' },
+  fid: registeredFid, // from registrationReceived
+};
+await getMessaging().send(message);
+```
+
+Using Installations `GetId()` alone without Messaging registration can yield `UNREGISTERED` / `NotRegistered` on send.
+
+### iOS Info.plist
+
+Enable FID-based Messaging registration (required for the new path on Apple platforms):
+
+```
+<key>FirebaseMessagingInstallationIdEnabled</key>
+<true/>
+```
+
+Also keep (or omit to leave the default enabled):
+
+```
+<key>FirebaseAppDelegateProxyEnabled</key>
+<true/>
+```
+
+To delay registration until consent, set auto-init off and call `registerInstance()` later:
+
+```
+<key>FirebaseMessagingAutoInitEnabled</key>
+<false/>
+```
+
+### Android
+
+To delay registration until consent, set in `AndroidManifest.xml`:
+
+```xml
+<meta-data android:name="firebase_messaging_auto_init_enabled"
+           android:value="false" />
+```
+
+Then call `registerInstance()` at runtime.
+
 ## Compiling Android
 
-This version only supports CMake, Firebase 13.3 has one link issue so for now we use 12.2.0
+This version only supports CMake.
 Firebase-qt can download the firebase_cpp-sdk for you but on gradle part you will need to
 point to where it should be so we are not _that_ automated yet.
 
     if(ANDROID)
-        set(FIREBASE_CPP_SDK_DIR "..path/to/firebase_cpp_sdk_13.3.0/")
+        set(FIREBASE_CPP_SDK_DIR "..path/to/firebase_cpp_sdk_13.13.0/")
         include(FetchContent)
         FetchContent_Declare(
             firebase_qt
@@ -97,7 +160,7 @@ Also you must comment all Qt variables else it will fail:
 
 Next gradle.properties where you also put your firebase_cpp-sdk path:
 
-    systemProp.firebase_cpp_sdk.dir=..path/to/firebase_cpp_sdk_13.3.0/
+    systemProp.firebase_cpp_sdk.dir=..path/to/firebase_cpp_sdk_13.13.0/
 
 Last build.gradle:
 
@@ -136,7 +199,7 @@ Last build.gradle:
 
 ### AndroidManifest.xml
 
-With the above code you will get Firebase working, which can give you a valid device token to send notifications.
+With the above code you will get Firebase working, which can give you a valid FID to send notifications.
 However in order to receive them when the app is running you must add what firebase-cpp-sdk/AndroidManafest.xml
 has to your own AndroidManifest.xml.
 
@@ -226,6 +289,8 @@ Where `Assets.xcassets` is not important for Firebase but you will likely have i
 Info.plist should have your App's information and be sure to add:
 ```
 <key>FirebaseAppDelegateProxyEnabled</key>
+<true/>
+<key>FirebaseMessagingInstallationIdEnabled</key>
 <true/>
 ```
 
