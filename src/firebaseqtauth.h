@@ -8,26 +8,25 @@
 class FirebaseQtApp;
 class FirebaseQtAuthCredential;
 class FirebaseQtAuthPrivate;
-class FirebaseQtAuth : public FirebaseQtAbstractModule
-{
-    Q_OBJECT
-    Q_DECLARE_PRIVATE(FirebaseQtAuth)
+class FirebaseQtAuth : public FirebaseQtAbstractModule {
+  Q_OBJECT
+  Q_DECLARE_PRIVATE(FirebaseQtAuth)
 public:
-    explicit FirebaseQtAuth(FirebaseQtApp *app);
-    virtual ~FirebaseQtAuth() override;
+  explicit FirebaseQtAuth(FirebaseQtApp *app);
+  virtual ~FirebaseQtAuth() override;
 
-    virtual void initialize(FirebaseQtApp *app) override;
+  virtual void initialize(FirebaseQtApp *app) override;
 
-    void signIn(const FirebaseQtAuthCredential &credential);
+  void signIn(const FirebaseQtAuthCredential &credential);
 
 Q_SIGNALS:
-    void signInError(int code, const QString &errorMessage);
-    void signInToken(const QString &token);
+  void signInError(int code, const QString &errorMessage);
+  void signInToken(const QString &token);
 
 protected:
-    friend class FirebaseQtAuthPhone;
+  friend class FirebaseQtAuthPhone;
 
-    FirebaseQtAuthPrivate *d_ptr;
+  FirebaseQtAuthPrivate *d_ptr;
 };
 
 #endif // FIREBASEQTAUTH_H

@@ -4,11 +4,10 @@
 #include "firebase/auth.h"
 
 class FirebaseQtAuthStateListener;
-class FirebaseQtAuthPrivate
-{
+class FirebaseQtAuthPrivate {
 public:
-    FirebaseQtAuthStateListener *stateListener = nullptr;
-    firebase::auth::Auth *auth                 = nullptr;
+  FirebaseQtAuthStateListener *stateListener = nullptr;
+  firebase::auth::Auth *auth = nullptr;
 };
 
 #endif // FIREBASEQTAUTH_P_H
