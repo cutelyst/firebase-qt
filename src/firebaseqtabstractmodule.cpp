@@ -3,6 +3,7 @@
 #include "firebaseqtapp.h"
 
 FirebaseQtAbstractModule::FirebaseQtAbstractModule(FirebaseQtApp *parent)
-    : QObject(parent) {
-  parent->registerModule(this);
+    : QObject(parent)
+{
+    parent->registerModule(this);
 }
